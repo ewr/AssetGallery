@@ -3,3 +3,26 @@
 Easy galleries of photos and more built on top of AssetHost.
 
 AssetHost can be found at http://github.com/SCPR/AssetHost
+
+== Requirements
+
+* AssetHost installation, configured in your app via AssetHost[:server] and AssetHost[:token]
+* Authentication system that defines @current_user and @current_user.is_admin?
+* Layout that looks to @PAGE_TITLE for title info
+
+== Usage
+
+1) Add the plugin to your Gemfile:
+
+    gem 'asset_gallery', :git => 'git://github.com/ewr/AssetGallery.git'
+
+Run `bundle install`
+
+2) Mount AssetGallery's routes.  In config/routes.rb:
+
+    mount AssetGallery::Engine => '/gallery', :as => :gallery
+
+3) Install and run migrations
+
+    rake asset_gallery:install:migrations
+    rake db:migrate
