@@ -1,0 +1,30 @@
+<% @PAGE_TITLE = @set.title %>
+
+<h1><%= @set.title %></h1>
+
+<% content_for :sidebar do %>
+	<% if @current_user && @current_user.is_admin? %>
+		<div id="assetcms"></div>
+		<% content_for :footerjss do %>
+			$.getScript("http://<%= AssetHost[:server] %>/assets/bdv4cms.js", function() {
+				AssetHost.TOKEN = "<%= AssetHost[:token] %>"
+				assetCMS = new AssetHost.bdv4CMS({
+					el:"#assetcms",
+					assets:<%= raw @set.set_assets.to_json %>
+				})
+
+				assetCMS.bind("assets",function(data) {
+					// when we get assets json from the chooser, save it back to the story
+					console.log("assets is ",data)
+					$.ajax("<%= assets_set_path(@set) %>",{
+						type:"POST",
+						data:{assets:JSON.stringify(data)},
+						success:function() {
+							$("#assetcms").effect("highlight")
+						}
+					})
+				})
+			})
+		<% end %>
+	<% end %>
+<% end %>

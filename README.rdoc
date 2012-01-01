@@ -1,0 +1,5 @@
+= AssetGallery
+
+Easy galleries of photos and more built on top of AssetHost.
+
+AssetHost can be found at http://github.com/SCPR/AssetHost
