@@ -20,23 +20,39 @@ class AssetGallery.SetViewer
         # -- load assets -- #
         
         console.log "Loading assets: ", assetdata
-        
         @assets = new AssetGallery.Models.Assets(assetdata)
         
         # -- initialize our views -- #
+        
+        # our strategy is to create a list and add each of our views as items
+        # we need to know a width, with will be assets+1 * width of our container
+        
+        @cwidth = $(@options.el).width()
+        totalw = @cwidth * ( @assets.size() + 1 )
+        @ul = $("<ul/>",style:"position:relative;width:#{totalw}px;height:400px")
+        $(@options.el).html @ul
 
         # Set View
         @setView = new SetViewer.SetView collection:@assets
+        @ul.append $("<li/>",
+            id:     "ag_sv_set",
+            style:  "width:#{@cwidth}px;left:0"
+        ).html @setView.render().el
 
         # Asset Detail View
-        @detailView = new SetViewer.DetailView model:@assets.at(0)
+        @assets.each (m,idx) =>
+            dv = new SetViewer.DetailView model:m
+            @ul.append $("<li/>",
+                id:     "ag_sv_a#{m.get('id')}",
+                style:  "width:#{@cwidth}px;left:#{(idx+1)*@cwidth}px"
+            ).html dv.render().el
 
         # -- set up our router -- #
         
         @router = new SetViewer.Router()
         
         @router.bind "route:index",     => @_viewIndex()
-        @router.bind "route:slide",     (id) => @_viewIndex(id)
+        @router.bind "route:slide",     (id) => @_viewSlide(id)
         @router.bind "route:detail",    (id) => @_viewDetail(id)
         
         # attach navigation listeners
@@ -46,32 +62,37 @@ class AssetGallery.SetViewer
         # kick off routing
         Backbone.history.start({pushState: true,root: @options.path})
         console.log "launching routing"
-        #@router.navigate("/",true)
+
+    #----------
+    
+    slideTo: (idx) ->
+        console.log "slideTo #{idx}: #{ -(idx*@cwidth) }"
+        @ul.stop().animate {left: -(idx*@cwidth)}, "slow"        
+        
+    #----------
         
     _viewIndex: (id=null) ->
         console.log "rendering index"
-        # render our set view into the browser
-        $(@options.el).html @setView.render().el
-        
-        # highlight the specific slide...
-        if id
-            console.log "should have highlighted ", @assets.get(id)
-        
-    _viewDetail: (id) ->
-        console.log "rendering detail for #{id}"
-        
-        @detailView.model = @assets.get(id)
-        
-        # render our detail view into the browser
-        $(@options.el).html @detailView.render().el        
+        @slideTo(0)
         
     #----------
     
+    _viewSlide: (id) ->
+        console.log "rendering slide for #{id}"
+        
+    #----------    
+        
+    _viewDetail: (id) ->
+        console.log "rendering detail for #{id}"
+        @slideTo @assets.indexOf( @assets.get id )+1
+        
+    #----------    
+            
     @Router:
         Backbone.Router.extend
             routes:
-                '/:id/:slug':   "detail"
-                '/:id':         "slide"
+                '/:id/detail':  "detail"
+                '/:id/':        "slide"
                 '/':            "index"
                 '':             "index"
                 
@@ -154,13 +175,13 @@ class AssetGallery.SetViewer
                 '''
                 <button data-asset-url="<%= url %>" draggable="true"><%= tags.lsquare %></button>
                 '''
-    
-            
+
     #----------
     
     @SetView:
         Backbone.View.extend
             tagName: "ul"
+            className: "ag_set_assets"
         
             initialize: ->
                 @_views = {}

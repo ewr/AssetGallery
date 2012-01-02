@@ -1,18 +1,35 @@
 <% @PAGE_TITLE = "#{@set.title} :: #{@asset.asset.title}" %>
+<% @PAGE_TITLE = @set.title %>
 
-<hr/>
+<h1><%= @set.title %></h1>
 
-<div class="ag_W" style="width: <%= @asset.asset.sizes.wide.width %>px;">
-	<%= @asset.asset.tag(:wide) %>
-	<div class="ag_credit">
-		<%= @asset.asset.owner %>
+<div id="ag_set_viewer">
+	<hr/>
+
+	<div class="ag_W" style="width: <%= @asset.asset.sizes.wide.width %>px;">
+		<%= @asset.asset.tag(:wide) %>
+		<div class="ag_credit">
+			<%= @asset.asset.owner %>
+		</div>
 	</div>
+
+	<h2><%= @asset.asset.title %></h2>
+
+	<p><%= @asset.caption %></p>
+
+	<% if @asset.asset.taken_at %>
+		<p><b>Taken:</b> <%= DateTime.parse(@asset.asset.taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%P") %> by <%= @asset.asset.owner %></p>
+	<% end %>
 </div>
 
-<h2><%= @asset.asset.title %></h2>
-
-<p><%= @asset.caption %></p>
-
-<% if @asset.asset.taken_at %>
-	<p><b>Taken:</b> <%= DateTime.parse(@asset.asset.taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%P") %> by <%= @asset.asset.owner %></p>
+<% content_for :footerjss do %>
+	var agSet = new AssetGallery.SetViewer(
+		<%= raw @set.set_assets.to_json %>,
+		{
+			el: 	"#ag_set_viewer",
+			path: 	"<%= set_path(@set) %>"
+		}
+	)
 <% end %>
+
+

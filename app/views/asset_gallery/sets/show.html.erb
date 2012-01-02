@@ -2,15 +2,15 @@
 
 <h1><%= @set.title %></h1>
 
-<div id="ag_set_assets">
-	<%= render :partial => "asset", :collection => @set.set_assets, :as => :asset %>
+<div id="ag_set_viewer">
+	<%= render :partial => "asset", :collection => @set.set_assets, :as => :asset %>	
 </div>
 
 <% content_for :footerjss do %>
 	var agSet = new AssetGallery.SetViewer(
 		<%= raw @set.set_assets.to_json %>,
 		{
-			el: 	"#ag_set_assets",
+			el: 	"#ag_set_viewer",
 			path: 	"<%= set_path(@set) %>"
 		}
 	)
