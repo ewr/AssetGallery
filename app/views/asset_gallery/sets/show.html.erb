@@ -21,10 +21,11 @@
 		<div id="assetcms"></div>
 		<% content_for :footerjss do %>
 			$.getScript("http://<%= AssetHost[:server] %>/assets/bdv4cms.js", function() {
+				// put admin token in place
 				AssetHost.TOKEN = "<%= AssetHost[:token] %>"
-				assetCMS = new AssetHost.bdv4CMS({
+				assetCMS = new AssetHost.bdv4CMS(<%= raw @set.set_assets.to_json %>,{
 					el:"#assetcms",
-					assets:<%= raw @set.set_assets.to_json %>
+					preview: false
 				})
 
 				assetCMS.bind("assets",function(data) {
