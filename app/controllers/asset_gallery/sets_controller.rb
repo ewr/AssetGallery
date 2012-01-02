@@ -11,6 +11,16 @@ module AssetGallery
       
     end
     
+    def show_asset
+      # Load asset
+      @asset = @set.set_assets.where(:asset_id => params[:asset]).first
+      
+      if !@asset
+        flash[:notice] = "Unable to find that asset in the set."
+        redirect_to set_path(@set)
+      end
+    end
+    
     #----------
     
     def new

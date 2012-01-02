@@ -1,0 +1,18 @@
+<% @PAGE_TITLE = "#{@set.title} :: #{@asset.asset.title}" %>
+
+<hr/>
+
+<div class="ag_W" style="width: <%= @asset.asset.sizes.wide.width %>px;">
+	<%= @asset.asset.tag(:wide) %>
+	<div class="ag_credit">
+		<%= @asset.asset.owner %>
+	</div>
+</div>
+
+<h2><%= @asset.asset.title %></h2>
+
+<p><%= @asset.caption %></p>
+
+<% if @asset.asset.taken_at %>
+	<p><b>Taken:</b> <%= DateTime.parse(@asset.asset.taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%P") %> by <%= @asset.asset.owner %></p>
+<% end %>

@@ -2,6 +2,20 @@
 
 <h1><%= @set.title %></h1>
 
+<div id="ag_set_assets">
+	<%= render :partial => "asset", :collection => @set.set_assets, :as => :asset %>
+</div>
+
+<% content_for :footerjss do %>
+	var agSet = new AssetGallery.SetViewer(
+		<%= raw @set.set_assets.to_json %>,
+		{
+			el: 	"#ag_set_assets",
+			path: 	"<%= set_path(@set) %>"
+		}
+	)
+<% end %>
+
 <% content_for :sidebar do %>
 	<% if @current_user && @current_user.is_admin? %>
 		<div id="assetcms"></div>
