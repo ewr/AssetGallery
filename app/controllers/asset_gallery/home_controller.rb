@@ -2,7 +2,10 @@ module AssetGallery
   class HomeController < ApplicationController
         
     def index
-      @sets = AssetGallery::Set.published.is_public
+      @sets = AssetGallery::Set.published.is_public.paginate(
+        :page => params[:page] || 1,
+        :per_page => 12
+      )
     end
   end
 end

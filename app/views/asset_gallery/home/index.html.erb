@@ -1,5 +1,13 @@
-<% @PAGE_TITLE = "Asset Sets" %>
+<% @PAGE_TITLE = "Sets" %>
 
-<h1>Asset Sets</h1>
+<% links = will_paginate(@sets, :previous_label => "« Newer Sets", :next_label => "Older Sets »") %>
 
+<h1>Sets</h1>
+
+<%= links %>
+
+<div id="ag_set_list"><ul>
 <%= render :partial => "set", :collection => @sets %>
+</div></ul>
+
+<%= links %>

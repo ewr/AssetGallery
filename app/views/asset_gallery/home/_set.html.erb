@@ -1,3 +1,4 @@
-<a href="<%= set_path set %>">
-	<%= set.title %>
-</a>
+<li><a href="<%= set_path set %>">
+	<%= set.set_assets.first.asset.tag(:lsquare) %>
+	<p><%= set.title %></p>
+</a></li>

@@ -2,13 +2,34 @@ module AssetGallery
   class SetAsset < ActiveRecord::Base
     belongs_to :set
     
+    @@loaded = false
+    
     validate :asset_id, :presence => true
     validate :position, :presence => true
     
     #----------
     
     def asset 
-      @_asset ||= AssethostAsset.find(self.asset_id)
+      if @_asset
+        return @_asset
+      end
+      
+      key = "asset_gallery/asset:#{self.asset_id}"
+      
+      if @@loaded && a = Rails.cache.read(key)
+        @_asset = a
+        return @_asset
+      else
+        # load
+        @_asset = AssethostAsset.find self.asset_id
+
+        # write cache that can be expired by content or asset
+        Rails.cache.write(key,@_asset,:objects => [self.set,@_asset])
+
+        @@loaded = true
+
+        return @_asset
+      end
     end
     
     #----------

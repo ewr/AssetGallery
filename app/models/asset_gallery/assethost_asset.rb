@@ -3,6 +3,10 @@ module AssetGallery
     self.site = "http://#{AssetHost[:server]}/api/"
     self.element_name = 'asset'
     self.include_root_in_json = false
+    
+    def obj_key
+      "asset_gallery/asset:#{self.id}"
+    end
 
     def tag(size)
       if !self.tags

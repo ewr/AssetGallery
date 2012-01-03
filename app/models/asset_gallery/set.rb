@@ -6,5 +6,10 @@ module AssetGallery
     
     scope :published, where(:is_published => true).order("created_at desc")
     scope :is_public, where(:is_public => true)
+    
+    def obj_key
+      "asset_gallery/set:#{self.id}"
+    end
+    
   end
 end

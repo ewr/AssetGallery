@@ -58,7 +58,21 @@ class AssetGallery.SetViewer
         # attach navigation listeners
         @assets.bind "clickSetAsset", (model) => @router.navigate("/#{model.get('id')}/detail",true)
         @assets.bind "clickToSet", => @router.navigate("/",true)
-
+        
+        @assets.bind "clickPrev", (m) => 
+            if @assets.indexOf(m) > 0
+                target = @assets.at( @assets.indexOf(m) - 1 )
+                @router.navigate("/#{target.get('id')}/detail",true)
+            else
+                @router.navigate('/',true)
+                
+        @assets.bind "clickNext", (m) =>
+            if @assets.indexOf(m) + 1 < @assets.size()
+                target = @assets.at( @assets.indexOf(m) + 1 )
+                @router.navigate("/#{target.get('id')}/detail",true)
+            else
+                @router.navigate('/',true)
+            
         # kick off routing
         Backbone.history.start({pushState: true,root: @options.path})
         console.log "launching routing"
@@ -122,15 +136,26 @@ class AssetGallery.SetViewer
             	<p><b>Taken:</b> <%= new Date(taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%p") %> by <%= owner %></p>
             	
             	<button class="ag_return">Return to Set</button>
+            	    
+            	<button class="ag_prev">Previous</button>
+            	<button class="ag_next">Next</button>
                 """
                 
             events:
                 "click button.ag_return": "_click"
+                "click button.ag_prev": "_clickPrev"
+                "click button.ag_next": "_clickNext"
                     
             initialize: ->
                 
             _click: ->
-                @model.trigger("clickToSet")    
+                @model.trigger "clickToSet"
+            
+            _clickPrev: ->
+                @model.trigger "clickPrev", @model 
+
+            _clickNext: ->
+                @model.trigger "clickNext", @model
                 
             render: ->
                 $( @el ).html _.template @template, @model.toJSON() 
@@ -182,7 +207,7 @@ class AssetGallery.SetViewer
         Backbone.View.extend
             tagName: "ul"
             className: "ag_set_assets"
-        
+                        
             initialize: ->
                 @_views = {}
                 
