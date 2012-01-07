@@ -83,7 +83,10 @@ class AssetGallery.SetViewer
                 @router.navigate("/#{target.get('id')}/detail",true)
             else
                 @router.navigate('/',true)
-                
+        
+        # attach slide navigation        
+        @slidenav.bind "slide", (idx) => @slides.slideTo(idx)
+        
         @slides.bind "slide", (idx) =>
             # set nav
             @slidenav.setCurrent(idx)
@@ -146,10 +149,10 @@ class AssetGallery.SetViewer
                 
             template:
                 '''
-                <div class="ag_slide_text" style="width:<%= width %>px">
+                <div style="width: <%= width %>px;margin: 0 auto"><div class="ag_slide_text">
                     <div class="credit"><%= credit %></div>
                     <p><%= caption %></p>
-                </div>
+                </div></div>
                 '''
                             
             #----------
@@ -161,7 +164,7 @@ class AssetGallery.SetViewer
                 
             #----------    
                 
-            render: ->
+            render: ->                
                 # --  determine which image to load based on size -- #
                 
                 # sort of sizes hash
@@ -169,9 +172,9 @@ class AssetGallery.SetViewer
                 _(sizes).each (v, k) => v.key = k 
                 sizes = _(sizes).sortBy (v) -> -v.width                
                 
-                # now take the first size that fits
+                # now take the first size that fits (or is within 100 pixels...)
                 @imgSize = _(sizes).find (v,i) =>
-                    if v.width < $(@el).width()
+                    if v.width < ( $(@el).width() + 100 )
                         # take it
                         return true
                     else
@@ -187,10 +190,12 @@ class AssetGallery.SetViewer
                 # create temp element and render
                 tmp = $ "<div/>"
                 
+                textW = if @imgSize.width > $(@el).width() then $(@el).width() else @imgSize.width
+                
                 $(tmp).html _.template @template,
                     credit:     @model.get("owner")
                     caption:    @model.get("caption")
-                    width:      @imgSize.width
+                    width:      textW
                     
                 @hidden.append tmp
                 
@@ -205,7 +210,38 @@ class AssetGallery.SetViewer
                 $(@el).html _.template @template, 
                     credit:     @model.get("owner")
                     caption:    @model.get("caption")
-                    width:      @imgSize.width
+                    width:      textW
+                    
+                # -- determine final image size -- #
+
+                @scale = 1
+
+                # check horizontal
+                if @imgSize.width > $(@el).width()
+                    hs = $(@el).width() / @imgSize.width
+                    
+                    if hs < @scale
+                        @scale = hs 
+
+                if @imgSize.height > @imgHeight
+                    vs = @imgHeight / @imgSize.height
+
+                    if vs < @scale
+                        @scale = vs
+
+                # -- create img div with final dimensions and margin -- #
+                
+                imgW = Math.round @imgSize.width * @scale
+                imgH = Math.round @imgSize.height * @scale
+                
+                imgML = Math.round ( $(@el).width() - imgW ) / 2
+                imgMT = Math.round ( @imgHeight - imgH ) / 2
+
+                @imgDiv = $ "<div/>", 
+                    class:"ah_imgholder"
+                    style:"width:#{imgW}px;height:#{imgH}px;margin: #{imgMT}px 0 0 #{imgML}px;"
+
+                $(@el).prepend @imgDiv
                                     
                 @
                 
@@ -216,38 +252,18 @@ class AssetGallery.SetViewer
                                 
                 # -- now load -- #
                 
-                @img = $ "<img/>", src:@model.get("urls")[@imgSize.key]
+                @img = $ "<img/>", 
+                    src:    @model.get("urls")[@imgSize.key]
+                    width:  @imgDiv.width()
+                    height: @imgDiv.height()
                 
                 @hidden.prepend @img
                 
                 @img.load (evt) =>
-                    # -- size image -- #
-                    scale = 1
-                    console.log "img w/h is", @img.width(), @img.height()
-                    console.log "el w/h is ",$(@el).width(),@imgHeight
-                    if @img.width() > $(@el).width()
-                        scale = $(@el).width() / @img.width()
-                        
-                    if @img.height() > @imgHeight
-                        vs = @imgHeight / @img.height()
-                        scale = if scale < vs then scale else vs
-                        
-                    console.log("scaling slide to ",scale)
-                        
-                    w = @img.width()
-                    h = @img.height()    
-                    @img.css "width", w * scale 
-                    @img.css "height", h * scale 
-                                        
-                    # -- center -- #
-                    
-                    @img.css "margin-left", ($(@el).width() - @img.width())/2
-                    @img.css "margin-top", (@imgHeight - @img.height())/2
-                    
                     # -- add to our element -- #
                     
                     @img.detach()                    
-                    $(@el).prepend @img
+                    @imgDiv.prepend @img
                     
                     if @controller.current == @index then $(@el).fadeIn('slow') else $(@el).show()
                     
