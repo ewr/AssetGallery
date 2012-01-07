@@ -260,11 +260,6 @@ class AssetGallery.SetViewer
         Backbone.View.extend
             className: "ag_slide_controller"
 
-            events:
-                'mouseover': '_mouseover'
-                'mouseout': '_mouseout'
-                'keydown': '_keyhandler'
-
             initialize: ->
                 @visible = false
                 $(@el).hide()
@@ -284,6 +279,8 @@ class AssetGallery.SetViewer
                 @active = false
 
                 @current = null
+                
+                $(window).bind "keydown", (evt) => @_keyhandler(evt)
 
             #----------
 
@@ -345,20 +342,15 @@ class AssetGallery.SetViewer
                 
             #----------
 
-            _mouseover: (e) ->
-                $(@el).focus()
-
-            _mouseout: (e) ->
-                $(@el).blur()
-
             _keyhandler: (e) ->
-                # is this a keypress we care about?
-                if e.which == 27
-                    @hide()
-                else if e.which == 37
-                    @slideBy(-1)
-                else if e.which == 39
-                    @slideBy(1)
+                if @visible
+                    # is this a keypress we care about?
+                    if e.which == 27
+                        @hide()
+                    else if e.which == 37
+                        @slideBy(-1)
+                    else if e.which == 39
+                        @slideBy(1)
 
             #----------
             
@@ -391,7 +383,7 @@ class AssetGallery.SetViewer
 
             slideTo: (idx) ->                
                 # figure out where slide[idx] is at
-                @view.stop().animate {left: -$(@slides[idx].el).position().left}, "slow"
+                @view.stop().animate {left: "-#{$(@slides[idx].el).css("left")}"}, "slow"
                 @current = idx
 
                 @trigger "slide", idx
