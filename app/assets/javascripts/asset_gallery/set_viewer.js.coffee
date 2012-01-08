@@ -46,18 +46,7 @@ class AssetGallery.SetViewer
                 id:     "ag_sv_a#{m.get('id')}",
                 style:  "width:#{@cwidth}px;left:#{(idx+1)*@cwidth}px"
             ).html dv.render().el
-            
-        # Slideshow View
-        @slidenav = new SetViewer.NavigationLinks
-            total: @assets.size()
-            current: 0
         
-        @slides = new SetViewer.SlideController 
-            collection: @assets
-            nav: @slidenav
-                        
-        $("body").append @slides.render().el
-
         # -- set up our router -- #
         
         @router = new SetViewer.Router()
@@ -67,7 +56,8 @@ class AssetGallery.SetViewer
         @router.bind "route:detail",    (id) => @_viewDetail(id)
         
         # attach navigation listeners
-        @assets.bind "clickSetAsset", (model) => @router.navigate("/#{model.get('id')}/",true)
+        #@assets.bind "clickSetAsset", (model) => @router.navigate("/#{model.get('id')}/",true)
+        @assets.bind "clickSetAsset", (model) => @slides.show @assets.indexOf(model)
         @assets.bind "clickToSet", => @router.navigate("/",true)
         
         @assets.bind "clickPrev", (m) => 
@@ -84,17 +74,31 @@ class AssetGallery.SetViewer
             else
                 @router.navigate('/',true)
         
-        # attach slide navigation        
-        @slidenav.bind "slide", (idx) => @slides.slideTo(idx)
+        # -- Slideshow Initialization -- #  
         
+        # Slideshow View
+        @slidenav = new SetViewer.NavigationLinks
+            total: @assets.size()
+            current: 0
+    
+        @slides = new SetViewer.SlideController 
+            collection: @assets
+            nav: @slidenav
+                              
+        @slidenav.bind "slide", (idx) => @slides.slideTo(idx)
+    
         @slides.bind "slide", (idx) =>
             # set nav
             @slidenav.setCurrent(idx)
-            
+        
             # set our URL back to the base slideshow. don't route off of it
             @router.navigate("/")
+
+        # scroll to 0,1 for IOS
+        $ => _.defer => window.scrollTo(0,1)
             
-        # kick off routing
+        # -- kick off routing -- #
+        
         Backbone.history.start({pushState: true,root: @options.path})
         console.log "launching routing"
 
@@ -145,7 +149,7 @@ class AssetGallery.SetViewer
     @SlideView:
         Backbone.View.extend
             tagName: 'li'
-            className: "slide"
+            className: "ag_slide"
                 
             template:
                 '''
@@ -161,12 +165,12 @@ class AssetGallery.SetViewer
                 @controller = @options.controller
                 @hidden = @options.hidden
                 @index = @options.index
-                
+                                
             #----------    
                 
             render: ->                
                 # --  determine which image to load based on size -- #
-                
+                                
                 # sort of sizes hash
                 sizes = @model.get("sizes")
                 _(sizes).each (v, k) => v.key = k 
@@ -201,7 +205,6 @@ class AssetGallery.SetViewer
                 
                 # get dimensions
                 @textHeight = $(tmp).height()
-                @imgHeight = $(@el).height() - @textHeight
                 
                 # and remove...
                 $(tmp).detach()
@@ -213,16 +216,39 @@ class AssetGallery.SetViewer
                     width:      textW
                     
                 # -- determine final image size -- #
+                
+                img = @_sizeImg @controller.textVisible
+                
+                @imgDiv = $ "<div/>", 
+                    class:"ah_imgholder"
+                    style:"width:#{img.width}px;height:#{img.height}px;margin: #{img['margin-top']}px 0 0 #{img['margin-left']}px;"
 
+                $(@el).prepend @imgDiv
+                
+                @
+                
+            #----------
+            
+            _sizeImg: (textVis=true) ->
                 @scale = 1
-
-                # check horizontal
+                
+                # -- horizontal -- #
+                
                 if @imgSize.width > $(@el).width()
                     hs = $(@el).width() / @imgSize.width
                     
                     if hs < @scale
                         @scale = hs 
 
+                # -- vertical -- #
+                
+                # first, check whether we're including text in our sizing
+                if textVis
+                    @imgHeight = $(@el).height() - @textHeight
+                else
+                    @imgHeight = $(@el).height()                
+
+                # now determine the height scale
                 if @imgSize.height > @imgHeight
                     vs = @imgHeight / @imgSize.height
 
@@ -230,20 +256,15 @@ class AssetGallery.SetViewer
                         @scale = vs
 
                 # -- create img div with final dimensions and margin -- #
-                
-                imgW = Math.round @imgSize.width * @scale
-                imgH = Math.round @imgSize.height * @scale
-                
-                imgML = Math.round ( $(@el).width() - imgW ) / 2
-                imgMT = Math.round ( @imgHeight - imgH ) / 2
 
-                @imgDiv = $ "<div/>", 
-                    class:"ah_imgholder"
-                    style:"width:#{imgW}px;height:#{imgH}px;margin: #{imgMT}px 0 0 #{imgML}px;"
-
-                $(@el).prepend @imgDiv
-                                    
-                @
+                img = {}
+                img["width"] = Math.round @imgSize.width * @scale
+                img["height"] = Math.round @imgSize.height * @scale
+                
+                img["margin-left"] = Math.round ( $(@el).width() - img.width ) / 2
+                img["margin-top"] = Math.round ( @imgHeight - img.height ) / 2
+                
+                img
                 
             #----------
                 
@@ -271,6 +292,7 @@ class AssetGallery.SetViewer
                     
                     @trigger "imgload"
             
+    #----------    
         
     @SlideController:
         Backbone.View.extend
@@ -279,6 +301,8 @@ class AssetGallery.SetViewer
             initialize: ->
                 @visible = false
                 $(@el).hide()
+                
+                @textVisible = true
                 
                 # -- create hidden element for dimensioning -- #
                 @hidden = $ "<div/>", style:"position:absolute; top:-10000px; width:0px; height:0px;"
@@ -297,14 +321,18 @@ class AssetGallery.SetViewer
                 @current = null
                 
                 $(window).bind "keydown", (evt) => @_keyhandler(evt)
+                
+                # attach to body
+                $('body').append @el
+                @_rendered = false
 
             #----------
 
-            render: () ->
+            render: ->
                 # -- grab window size for setting bounds -- #
                 
-                @wW = $(window).width()
-                @wH = $(window).height()
+                @wW = window.innerWidth or $(window).width()
+                @wH = window.innerHeight or $(window).height()
                 
                 $(@el).attr "tabindex", -1
 
@@ -353,6 +381,8 @@ class AssetGallery.SetViewer
 
                 # create our load queue
                 #@queueSlides _.range 0,4 
+                
+                @_rendered = true
 
                 @
                 
@@ -371,6 +401,10 @@ class AssetGallery.SetViewer
             #----------
             
             show: (idx=@current) ->
+                # render if this is our first time showing
+                if !@_rendered
+                    @render()
+                
                 if !@visible
                     console.log "prepared to show slide #{idx}: ", $(@slides[idx].el).css "left"
                     # don't animate.  just update our css
@@ -397,7 +431,7 @@ class AssetGallery.SetViewer
             
             #----------
 
-            slideTo: (idx) ->                
+            slideTo: (idx) ->                               
                 # figure out where slide[idx] is at
                 @view.stop().animate {left: "-#{$(@slides[idx].el).css("left")}"}, "slow"
                 @current = idx
