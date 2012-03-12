@@ -1,5 +1,10 @@
 module AssetGallery
   class ApplicationController < ::ApplicationController
+    
+    def asset_model
+      AssetGallery::Config.asset_model
+    end
+    
     def require_admin
       if @current_user && @current_user.is_admin?
         return true
