@@ -1,5 +1,9 @@
 module AssetGallery
   class AssethostAsset < ActiveResource::Base
+    if !AssetHost
+      return false
+    end
+    
     self.site = "http://#{AssetHost[:server]}/api/"
     self.element_name = 'asset'
     self.include_root_in_json = false
