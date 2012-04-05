@@ -1,6 +1,9 @@
 = AssetGallery
 
-Easy galleries of photos and more built on top of AssetHost.
+Easy galleries of photos and more built on top of AssetHost.  You can find 
+an example implementation on my website at http://ericrichardson.com/gallery/
+
+The client code is a Coffeescript app using Backbone.js.
 
 AssetHost can be found at http://github.com/SCPR/AssetHost
 
