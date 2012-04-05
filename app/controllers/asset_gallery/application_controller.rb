@@ -1,6 +1,8 @@
 module AssetGallery
   class ApplicationController < ::ApplicationController
     
+    layout AssetGallery::Config.layout
+    
     def asset_model
       AssetGallery::Config.asset_model
     end

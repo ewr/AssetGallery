@@ -1,7 +1,5 @@
 <% @PAGE_TITLE = @set.title %>
 
-<h1><%= @set.title %></h1>
-
 <div id="ag_set_viewer">
 	<%= render :partial => "asset", :collection => @set.set_assets, :as => :asset %>	
 </div>

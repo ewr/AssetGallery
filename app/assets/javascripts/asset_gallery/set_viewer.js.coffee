@@ -322,6 +322,12 @@ class AssetGallery.SetViewer
                 
                 $(window).bind "keydown", (evt) => @_keyhandler(evt)
                 
+                # register a click handler on our element
+                $(@el).on "click", (evt) =>
+                    # if the click was on the current slide, take that as a signal to close
+                    if evt.srcElement == @slides[ @current ]?.el
+                        @hide()
+                
                 # attach to body
                 $('body').append @el
                 @_rendered = false
