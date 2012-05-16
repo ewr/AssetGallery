@@ -19,7 +19,7 @@
 		<div id="assetcms"></div>
 		
 		<% content_for :footerjss do %>
-    	assetCMS = new AssetHost.railsCMS(<%= raw @set.assets.to_json %>,{el:"#assetcms"})
+    	assetCMS = new AssetHost.railsCMS(<%= raw @set.set_assets.to_json %>,{el:"#assetcms"})
 
     	assetCMS.bind("assets",function(data) {
     		// when we get assets json from the chooser, save it back to the story
