@@ -7,6 +7,6 @@ if !window.console
     class window.console
         @log: ->
 
-AssetGallery ?= {}
+window.AssetGallery ?= {}
 
 
