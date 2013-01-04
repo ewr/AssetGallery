@@ -1,5 +1,5 @@
 module AssetGallery
-  class HomeController < ApplicationController
+  class HomeController < ::AssetGallery::ApplicationController
         
     def index
       @sets = AssetGallery::Set.published.is_public.paginate(

@@ -1,5 +1,5 @@
 module AssetGallery
-  class SetsController < ApplicationController
+  class SetsController < ::AssetGallery::ApplicationController
     
     before_filter :load_set, :except => [:new,:create,:index]
     before_filter :require_admin, :except => [:index,:show]
