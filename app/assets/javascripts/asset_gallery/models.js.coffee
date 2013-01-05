@@ -2,7 +2,7 @@ class AssetGallery.Models
     constructor: ->
         
     @Asset: Backbone.Model.extend
-        urlRoot: "http://#{AssetHost.SERVER}/api/assets/"
+        urlRoot: "#{AssetHost.SERVER}/api/assets/"
                     
         #----------
         
