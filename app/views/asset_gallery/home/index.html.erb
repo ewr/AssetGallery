@@ -1,6 +1,6 @@
 <% @PAGE_TITLE = "Photo Sets" %>
 
-<% links = will_paginate(@sets, :previous_label => "« Newer Sets", :next_label => "Older Sets »", :renderer => BootstrapPagination::Rails, :class => "pagination pagination-centered") %>
+<% links = paginate @sets, :class => "pagination pagination-centered") %>
 
 <%= links %>
 
