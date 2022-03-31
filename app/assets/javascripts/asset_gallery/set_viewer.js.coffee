@@ -573,22 +573,22 @@ class AssetGallery.SetViewer
             template:
                 """
                 <div class="ag_W" style="width: <%= sizes.wide.width %>px;">
-                	<%= tags.wide %>
-                	<div class="ag_credit">
-                		<%= owner %>
-                	</div>
+                    <%= tags.wide %>
+                    <div class="ag_credit">
+                        <%= owner %>
+                    </div>
                 </div>
 
                 <h2><%= title %></h2>
 
                 <p><%= caption %></p>
 
-            	<p><b>Taken:</b> <%= new Date(taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%p") %> by <%= owner %></p>
-            	
-            	<button class="ag_return">Return to Set</button>
-            	    
-            	<button class="ag_prev">Previous</button>
-            	<button class="ag_next">Next</button>
+                <p><b>Taken:</b> <%= new Date(taken_at).strftime("%A, %B %-d, %Y, at %-I:%M%p") %> by <%= owner %></p>
+                
+                <button class="ag_return">Return to Set</button>
+                    
+                <button class="ag_prev">Previous</button>
+                <button class="ag_next">Next</button>
                 """
                 
             events:
@@ -621,8 +621,8 @@ class AssetGallery.SetViewer
             tipTemplate:
                 '''
                 <h3><%= title %></h3>
-        		<%= owner %>
-        		<br/><%= size %>                
+                <%= owner %>
+                <br/><%= size %>                
                 '''
                 
             events:
