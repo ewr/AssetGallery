@@ -161,7 +161,7 @@ class AssetGallery.SetViewer
                             
             #----------
                 
-            initialize: ->
+            initialize: (@options) ->
                 @controller = @options.controller
                 @hidden = @options.hidden
                 @index = @options.index
@@ -298,7 +298,7 @@ class AssetGallery.SetViewer
         Backbone.View.extend
             className: "ag_slide_controller"
 
-            initialize: ->
+            initialize: (@options) ->
                 @visible = false
                 $(@el).hide()
                 
@@ -528,7 +528,7 @@ class AssetGallery.SetViewer
 
             #----------
 
-            initialize: ->
+            initialize: (@options) ->
                 @total = @options.total
                 @current = Number(@options.current) + 1
 
